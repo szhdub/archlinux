@@ -84,6 +84,7 @@ type alias History =
     , sum : Float
     }
 
+type alias Session = String
 
 type alias Model =
     { netdata : NetDataSt
@@ -110,6 +111,7 @@ type alias Model =
     , servers : Maybe (List ServerStock)
     , viewPage : ViewPage
     , history : Maybe (List Order)
+    , session : Session
     }
 
 
@@ -137,6 +139,7 @@ initial_model =
     , servers = Nothing
     , viewPage = ViewOrders
     , history = Nothing
+    , session = "7B2270617373776F7264223A227869616F20313233222C2275736572223A227869616F687569227D"
     }
 
 
@@ -282,8 +285,8 @@ view s =
             view_orders s netdata.orders s.selected_order
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
+init : String -> ( Model, Cmd Msg )
+init session =
     let
         initial =
             initial_model
@@ -294,7 +297,7 @@ init _ =
     , Cmd.batch
         [ Task.perform SetCurrentTime Time.now
         , Task.perform AdjustTimeZone Time.here
-        , query_status initial.token
+        , query_status (Debug.log "session:" session)
         ]
     )
 
@@ -381,7 +384,7 @@ login_res s sr =
         Ok fullText ->
             case Decode.decodeString decode_login fullText of
                 Ok login_info ->
-                    { s | token = login_info.token }
+                    { s | token = login_info.token, session = login_info.token }
 
                 Err desc ->
                     let

@@ -10,6 +10,7 @@ import LegacyPage exposing (..)
 import OrdersManage exposing (..)
 import Time
 import UsersManage exposing (..)
+import Maybe
 
 
 
@@ -32,7 +33,7 @@ type Model1
 
 
 type alias Model =
-    { m1 : Model1, session : Maybe String }
+    { m1 : Model1, session : Session }
 
 
 type Msg
@@ -67,9 +68,9 @@ init : () -> ( Model, Cmd Msg )
 init flags =
     let
         ( model, msg ) =
-            OrdersManage.init flags
+            OrdersManage.init ""
     in
-    ( { m1 = OrdersManageModel model, session = Nothing }, Cmd.map OrdersManageMsg msg )
+    ( { m1 = OrdersManageModel model, session = "" }, Cmd.map OrdersManageMsg msg )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -104,23 +105,24 @@ update msg model =
             ( { model | m1 = OrdersManageModel acc }, Cmd.map OrdersManageMsg ntask )
 
         ( _, SetView newView ) ->
-            ( { model | m1 = setView newView }, Cmd.none )
+            ( { model | m1 = setView model newView }, Cmd.none )
 
         ( _, _ ) ->
             ( model, Cmd.none )
 
 
-setView newView =
+setView : Model -> NewView -> Model1
+setView model newView =
     case newView of
         UsersManageView ->
             UsersManageModel UsersManage.init
 
         OrdersManageView ->
             let
-                ( model, _ ) =
-                    OrdersManage.init ()
+                ( mo, _ ) =
+                    OrdersManage.init model.session
             in
-            OrdersManageModel model
+            OrdersManageModel mo
 
         StockManageView ->
             UsersManageModel UsersManage.init
@@ -151,6 +153,7 @@ view { m1 } =
         ]
 
 
+mainmenu : Html Msg
 mainmenu =
     div []
         [ Html.button [ onClick (SetView OrdersManageView) ] [ text Lang.eng_text.orders ]
