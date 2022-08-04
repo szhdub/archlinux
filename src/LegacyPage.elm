@@ -14,6 +14,7 @@ import List exposing (map)
 import SingleDatePicker as DatePicker exposing (TimePickerVisibility, defaultTimePickerSettings)
 import Task exposing (Task)
 import Time exposing (Month(..), Posix, Zone, here)
+import OrdersManage exposing (..)
 
 
 
@@ -672,14 +673,14 @@ decode_user =
         |> required "allow_credits" Decode.string
 
 
-type alias LoginInfo =
-    { token : String }
+-- type alias LoginInfo =
+--     { token : String }
 
 
-decode_login : Decoder LoginInfo
-decode_login =
-    Decode.succeed LoginInfo
-        |> required "token" Decode.string
+-- decode_login : Decoder LoginInfo
+-- decode_login =
+--     Decode.succeed LoginInfo
+--         |> required "token" Decode.string
 
 
 decode_server_res =

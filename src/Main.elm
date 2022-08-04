@@ -4,27 +4,12 @@ import Browser
 import Debug exposing (..)
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Json.Decode
 import Lang exposing (..)
 import LegacyPage exposing (..)
 import OrdersManage exposing (..)
 import Time
 import UsersManage exposing (..)
-import Maybe
-
-
-
-{--Shadow 的思路
-type Model1 =  UsersManageModel UsersManage.Model
-             | LegacyPageModel LegacyPage.Model
-             | OrdersManageModel OrdersManage.Model
-
-type Model = { m1 : Model1, session : Maybe String}       
---}
--- type Model =  UsersManageModel UsersManage.Model
---              | LegacyPageModel LegacyPage.Model
---              | OrdersManageModel OrdersManage.Model
-
+import Json.Decode as Decode exposing (Value, decodeString, decodeValue, Decoder)
 
 type Model1
     = UsersManageModel UsersManage.Model
@@ -33,7 +18,7 @@ type Model1
 
 
 type alias Model =
-    { m1 : Model1, session : Session }
+    { m1 : Model1, session : String }
 
 
 type Msg
@@ -51,6 +36,8 @@ type NewView
     | StockManageView
 
 
+
+main : Program ((String)) Model Msg
 main =
     Browser.element
         { init = init
@@ -64,14 +51,26 @@ subscriptions _ =
     Time.every 3000 Tick
 
 
-init : () -> ( Model, Cmd Msg )
+init : String  -> ( Model, Cmd Msg )
 init flags =
     let
-        ( model, msg ) =
-            OrdersManage.init ""
-    in
-    ( { m1 = OrdersManageModel model, session = "" }, Cmd.map OrdersManageMsg msg )
+        posts =
+            case Decode.decodeString decodeStored flags of
+                Ok postsJson ->
+                    postsJson.token
 
+                Err _ ->
+                    "无效的token"
+
+        ( model, msg ) =
+            OrdersManage.init flags
+    in
+    ( { m1 = OrdersManageModel model, session = posts }, Cmd.map OrdersManageMsg msg )
+
+decodeStored : Decoder LoginInfo
+decodeStored =
+    Decode.map LoginInfo
+        (Decode.field "token" Decode.string)
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =

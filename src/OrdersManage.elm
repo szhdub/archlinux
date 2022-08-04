@@ -1,4 +1,4 @@
-module OrdersManage exposing (..)
+module OrdersManage exposing (LoginInfo, Model, view, init, update, Msg(..), decode_login, saveToken)
 
 import Browser
 import Date
@@ -84,7 +84,6 @@ type alias History =
     , sum : Float
     }
 
-type alias Session = String
 
 type alias Model =
     { netdata : NetDataSt
@@ -111,15 +110,14 @@ type alias Model =
     , servers : Maybe (List ServerStock)
     , viewPage : ViewPage
     , history : Maybe (List Order)
-    , session : Session
     }
 
 
-initial_model : Model
-initial_model =
+initial_model : String -> Model
+initial_model session =
     { netdata = Loading
     , error = ""
-    , token = ""
+    , token = session
     , username = ""
     , password = ""
     , order_note = ""
@@ -139,8 +137,25 @@ initial_model =
     , servers = Nothing
     , viewPage = ViewOrders
     , history = Nothing
-    , session = "7B2270617373776F7264223A227869616F20313233222C2275736572223A227869616F687569227D"
+    
     }
+
+
+init : String -> ( Model, Cmd Msg )
+init session =
+    let
+        initial token =
+            initial_model token
+
+        ----      task = Task.map2 Time.here Time.now
+    in
+    ( initial (Debug.log "token" session)
+    , Cmd.batch
+        [ Task.perform SetCurrentTime Time.now
+        , Task.perform AdjustTimeZone Time.here
+        , query_status session
+        ]
+    )
 
 
 type Msg
@@ -194,6 +209,14 @@ type alias PlaceRes =
     , details : String
     }
 
+saveToken : LoginInfo -> Cmd Msg
+saveToken token =
+  Encode.object
+    [( "token", Encode.string token.token)]
+        |> Encode.encode 0
+        |> Lang.storeToken
+
+
 
 update msg model =
     case msg of
@@ -208,7 +231,7 @@ update msg model =
 
         --LoginRes sr -> (login_res model sr, Lang.Session_Data st,Cmd.none)
         LoginRes sr ->
-            ( login_res model sr, Cmd.none )
+            login_res model sr
 
         Login ->
             ( model, login_cmd model )
@@ -283,23 +306,6 @@ view s =
 
         ND netdata ->
             view_orders s netdata.orders s.selected_order
-
-
-init : String -> ( Model, Cmd Msg )
-init session =
-    let
-        initial =
-            initial_model
-
-        ----      task = Task.map2 Time.here Time.now
-    in
-    ( initial
-    , Cmd.batch
-        [ Task.perform SetCurrentTime Time.now
-        , Task.perform AdjustTimeZone Time.here
-        , query_status (Debug.log "session:" session)
-        ]
-    )
 
 
 login_form model =
@@ -379,22 +385,22 @@ login_cmd model =
         }
 
 
+login_res : Model -> Result error String -> (Model, Cmd Msg)
 login_res s sr =
     case sr of
         Ok fullText ->
             case Decode.decodeString decode_login fullText of
                 Ok login_info ->
-                    { s | token = login_info.token, session = login_info.token }
+                    ({ s | token = login_info.token }, saveToken login_info)
 
                 Err desc ->
                     let
                         err =
                             Decode.errorToString desc
                     in
-                    { s | error = err }
-
+                    ({ s | error = err }, Cmd.none)
         _ ->
-            s
+            (s, Cmd.none)
 
 
 decode_status : Decoder Status
@@ -465,7 +471,7 @@ view_orders text orders selected_order =
             [ Html.Attributes.style "border" "1px solid"
             , Html.Attributes.style "float" "left"
             ]
-            []
+            [ ]
         ]
 
 

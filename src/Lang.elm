@@ -1,4 +1,4 @@
-module Lang exposing (..)
+port module Lang exposing (..)
 
 
 type alias LocalText =
@@ -75,3 +75,5 @@ type alias Login_Token =
 login_token =
     { token = ""
     }
+
+port storeToken : String -> Cmd msg
