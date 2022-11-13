@@ -22,7 +22,8 @@ alias fy='trans -sp'
 #alias diff='delta'
 alias myip="curl ifconfig.me/ip && curl ifconfig.me/lang"
 # proxy
+alias sethttp="export http_proxy='127.0.0.1:8889'"
+alias sethttps="export https_proxy='127.0.0.1:8889'"
 alias setproxy="export ALL_PROXY=socks5://127.0.0.1:1089"
 alias unsetproxy="unset ALL_PROXY"
-
 
