@@ -24,14 +24,14 @@ new_window pixel 1
 # 靠近屏幕边缘隐藏边框
 hide_edge_borders smart
 
+# 窗口杀死命令
+bindsym $mod+Shift+q kill
+
 # 改变边框样式(隐藏/显示边框、隐藏/显示标题)
 bindsym $mod+n border pixel 0
 bindsym $mod+Shift+n border pixel 1
 bindsym $mod+y border normal 1
 bindsym $mod+Shift+y border pixel 1
-
-# 窗口杀死命令
-bindsym $mod+Shift+q kill
 
 # 启动程序启动器
 bindsym $mod+Return exec GLFW_IM_MODULE=ibus kitty
@@ -199,24 +199,32 @@ mode "$mode_system" {
 bindsym $mod+r mode "resize"
 mode "resize" {
         # These bindings trigger as soon as you enter the resize mode
+        # 一旦您进入resize模式，这些绑定就会触发 
         # Pressing left will shrink the window’s width.
+        # 按左键将缩小窗口的宽度。
         # Pressing right will grow the window’s width.
+        # 按右键将增大窗口的宽度。
         # Pressing up will shrink the window’s height.
+        # 按上键将缩小窗口的高度。
         # Pressing down will grow the window’s height.
-        bindsym j resize shrink width 5 px or 5 ppt
-        bindsym k resize grow height 5 px or 5 ppt
-        bindsym l resize shrink height 5 px or 5 ppt
-        bindsym semicolon resize grow width 5 px or 5 ppt
+        # 按下将增大窗口的高度。
+        bindsym $left resize shrink width 10 px or 10 ppt
+        bindsym $down resize grow height 10 px or 10 ppt
+        bindsym $up resize shrink height 10 px or 10 ppt
+        bindsym $right resize grow width 10 px or 10 ppt
 
+        # same bindings, but for the arrow keys
         # 相同的绑定，但对于箭头键
         bindsym Left resize shrink width 10 px or 10 ppt
         bindsym Down resize grow height 10 px or 10 ppt
         bindsym Up resize shrink height 10 px or 10 ppt
         bindsym Right resize grow width 10 px or 10 ppt
 
-        # 退出调整大小模式：Enter 或 Escape
+        # back to normal: Enter or Escape or $mod+Shift+r
+        # 恢复正常：Enter or Escape or $mod+Shift+r
         bindsym Return mode "default"
         bindsym Escape mode "default"
+        bindsym $mod+r mode "default"
 }
 
 # Autostart applications
