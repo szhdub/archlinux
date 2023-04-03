@@ -425,7 +425,8 @@ bindsym $mod+m exec pcmanfm
 
 # start the firefox
 bindsym $mod+shift+f exec firefox
-
+# idea
+bindsym $mod+shift+i exec idea
 
 # 文件管理
 bindsym $mod+Ctrl+f exec kitty -e 'ranger'
